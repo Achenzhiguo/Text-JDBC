@@ -5,16 +5,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-/**
- * 优化TextJDBC版本2：驱动的加载---反射来获取驱动
- *      1、根据第一个项目于导包，创建实例时我们得知、
- *              接口是由jdk提供，实现子类是在我们引入的以依赖中实现的
- *
- * @Auther: erdongchen
- * @Date: 2022/4/30 - 04 - 30 - 13:53
- * @Description: com.czg.jdbc
- * @version: 1.0
- */
+
 public class TextJDBC2 {
 
     //这是一个main方法，主程序的入口 ：
