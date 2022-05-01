@@ -39,6 +39,8 @@ public class TextJDBC {
         *           useUnicode=true                     是否使用Unicode字符集，使用设置为true
         *           characterEncoding=UTF-8             指定使用UTF-8
         *           serverTimezone=Asia/Shanghai        指定时区为亚洲上海       或者可以这样些serverTimezone=GMT%2B8
+        *           useServerPrepStmts = true           是否启用预编译     默认值是false,需要手动启动
+        *           cachePrepStmts = ture               是否启用预编译缓存   默认值是false,需要手动启动,,提升性能
         *
         *
         *整体url结构：   协议：//IP：端口/资源路径？参数名= 参数值&参数名=参数值&参数名=参数值&...

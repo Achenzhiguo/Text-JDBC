@@ -1,59 +1,68 @@
 package com.czg.jdbc;
 
+import com.czg.pojo.Account;
+import com.czg.pojo.Emp;
+import jdk.nashorn.internal.ir.ReturnNode;
+
+import javax.print.DocFlavor;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 /**
- * 查询
- * resultSet这个集合只能临时储存数据，使用结束后会关闭掉，不能作为参数进行传递，那么如何永久的保存对象且可以传递呢，
- * java万物皆对象，见下一节
+ *
+ * 演示SQL注入攻击
+ *      攻击的要点，通过字符串对SQL语句进行破坏
  *
  * @Auther: erdongchen
- * @Date: 2022/4/30 - 04 - 30 - 17:22
+ * @Date: 2022/5/1 - 05 - 01 - 14:36
  * @Description: com.czg.jdbc
  * @version: 1.0
  */
-public class TextJDBC5 {
+public class TextJDBCBreakSQL {
     private static String url = "jdbc:mysql://127.0.0.1:3306/mysql80?UseSSL=false&useUnicode=ture&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
     private static String user = "root";
     private static String password = "root";
 
     public static void main(String[] args) {
-        //查询全部员工信息
-        textQuary();
-    }
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入用户名");
+        String uname = sc.next();
+        System.out.println("请输入密码");
+        String pwd = sc.next();
 
-    /**
-     * 查询全部员工信息
-     */
-    public static void textQuary(){
+        Account account = getAccount(uname,pwd);
+        System.out.println(null!=account?"登录成功":"登录失败");
+        System.out.println(account);
+        sc.close();
+    }
+    public static Account  getAccount(String uname,String pwd){
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet =null;
+        Account account = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url,user,password);
             statement = connection.createStatement();
-            String sql = "select * from emp";
+            String sql="select * from account where username ='"+uname+"' and password ='"+pwd+"'";
+//            String sql = "select * from account whwere username = ' "+uname+"' and password = '"+pwd+"'";
+            System.out.println(sql);
             resultSet = statement.executeQuery(sql);
-
-            //这里不萌直接打印，必须判断以下，如果单条打印，可以给出每一个字段的索引
             while(resultSet.next()){
-                int empno = resultSet.getInt("empno");
-                String ename = resultSet.getString("ename");
-                String job = resultSet.getString("job");
-                int mgr = resultSet.getInt("mgr");
-                Date hiredate = resultSet.getDate("hiredate");
-                double sal = resultSet.getDouble("sal");
-                double comm = resultSet.getDouble("comm");
-                int deptno = resultSet.getInt("deptno");
-                System.out.println(""+empno+""+ename+""+job+""+mgr+""+hiredate+""+sal+""+comm+""+deptno);
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("password");
+                Double balance = resultSet.getDouble("balance");
+                account = new Account(username,password,balance);
+
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if(null!=resultSet){//官弁resultSet----------这里其实不用关闭也可以，statemet关闭也会吧resUltset关闭掉
+            if(null!=resultSet){
                 try {
                     resultSet.close();
                 } catch (SQLException e) {
@@ -74,6 +83,8 @@ public class TextJDBC5 {
                     e.printStackTrace();
                 }
             }
-        }
+
+        }return account;
     }
+
 }
