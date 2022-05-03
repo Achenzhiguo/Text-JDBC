@@ -24,10 +24,6 @@ import java.util.List;
  * @version: 1.0
  */
 public class BaseDao {
-    private static String url = "jdbc:mysql://127.0.0.1:3306/mysql80?UseSSL=false&useUnicode=ture&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
-    private static String user = "root";
-    private static String password = "root";
-
     //    String sql = "select * from emp where ename like ? ";
     //查询方法不猛和增删改通用,因为返回值类型不同,但是不知道具体要查询的类,那么就把这个类的字节码文件也穿进去,利用反射读取属性,
     public List baseQuary(Class clazz, String sql, Object...args){
@@ -36,8 +32,8 @@ public class BaseDao {
         ResultSet resultSet =null;
         List list = null;
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection(url,user,password);
+
+            connection = MyConnectionPoor.getConnection();
             preparedStatement = connection.prepareStatement(sql);
 
             for (int i = 0; i < args.length; i++) {
@@ -65,8 +61,6 @@ public class BaseDao {
                 list.add(obj);
             }
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -108,9 +102,8 @@ public class BaseDao {
         ResultSet resultSet = null;
         int rows = 0;
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection(url, user, password);
 
+            connection = MyConnectionPoor.getConnection();
             preparedStatement = connection.prepareStatement(sql);
 
             for (int i = 0; i < args.length; i++) {
@@ -118,8 +111,6 @@ public class BaseDao {
             }
             rows = preparedStatement.executeUpdate();//这里不需要也不能传入sql,会报错
             System.out.println(rows);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
