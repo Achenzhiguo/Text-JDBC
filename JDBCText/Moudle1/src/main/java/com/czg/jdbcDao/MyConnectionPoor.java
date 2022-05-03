@@ -1,6 +1,8 @@
 package com.czg.jdbcDao;
 
 import com.czg.util.PropertiesUtil;
+import org.apache.log4j.Logger;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,7 +25,10 @@ public class MyConnectionPoor {
     private static int initSize;
     private static int maxSize;
     private static LinkedList<Connection> pool;
+    private static Logger logger;
+
     static{//静态代码块读取配置文件中的信息
+        logger = Logger.getLogger(MyConnectionPoor.class);
         PropertiesUtil propertiesUtil = new PropertiesUtil("/jdbc.properties");
         driver = propertiesUtil.getProperties("driver");
         url = propertiesUtil.getProperties("url");
@@ -35,7 +40,7 @@ public class MyConnectionPoor {
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.fatal("加载驱动出异常了"+driver,e);
         }
         // 初始化pool
         pool=new LinkedList<Connection>();
@@ -44,7 +49,7 @@ public class MyConnectionPoor {
             Connection connection = initConnection();
             if(null != connection){
                 pool.add(connection);
-                System.out.println("初始化连接"+connection.hashCode()+"放入连接池");
+                logger.info("初始化连接"+connection.hashCode()+"放入连接池");
             }
         }
     }
@@ -53,7 +58,7 @@ public class MyConnectionPoor {
         try {
             return DriverManager.getConnection(url,user,password);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("链接获取失败",e);
         }
         return null;
     }
@@ -62,10 +67,10 @@ public class MyConnectionPoor {
         Connection connection =null;
         if(pool.size()>0){
             connection= pool.removeFirst();// 移除集合中的第一个元素
-            System.out.println("连接池中还有连接:"+connection.hashCode());
+            logger.debug("连接池中还有连接:"+connection.hashCode());
         }else{
             connection = initConnection();
-            System.out.println("连接池空,创建新连接:"+connection.hashCode());
+            logger.debug("连接池空,创建新连接:"+connection.hashCode());
         }
         return connection;
     }
@@ -77,28 +82,28 @@ public class MyConnectionPoor {
                     if(pool.size()<maxSize){
                         try {
                             connection.setAutoCommit(true);// 调整事务状态
-                            System.out.println("设置连接:"+connection.hashCode()+"自动提交为true");
+                            logger.debug("设置连接:"+connection.hashCode()+"自动提交为true");
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
                         pool.addLast(connection);
-                        System.out.println("连接池未满,归还连接:"+connection.hashCode());
+                        logger.warn("连接池未满,归还连接:"+connection.hashCode());
                     }else{
                         try {
                             connection.close();
-                            System.out.println("连接池满了,关闭连接:"+connection.hashCode());
+                            logger.info("连接池满了,关闭连接:"+connection.hashCode());
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
                     }
                 }else{
-                    System.out.println("连接:"+connection.hashCode()+"已经关闭,无需归还");
+                    logger.warn("连接:"+connection.hashCode()+"已经关闭,无需归还");
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }else{
-            System.out.println("传入的连接为null,不可归还");
+            logger.warn("传入的连接为null,不可归还");
         }
     }
 
